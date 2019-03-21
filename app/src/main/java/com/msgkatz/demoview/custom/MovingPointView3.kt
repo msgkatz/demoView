@@ -11,6 +11,9 @@ import android.view.View
 import android.view.ViewTreeObserver
 import android.view.animation.AccelerateDecelerateInterpolator
 import com.msgkatz.demoview.R
+import com.msgkatz.demoview.math.Float2
+import com.msgkatz.demoview.math.Ray
+import com.msgkatz.demoview.math.normalize
 import kotlin.math.roundToInt
 
 
@@ -71,7 +74,7 @@ class MovingPointView3(context: Context, attrs: AttributeSet) : View(context, at
 
         val sPoint = PointF(width/2f, height/1.5f)
         val dPoint = PointF(width/2f, height/2f)
-        system = MotionSystem3(sPoint, dPoint)
+        system = MotionSystem3(sPoint, dPoint, width.toFloat())
 
         return true
     }
@@ -158,15 +161,16 @@ data class Ray(var origin: Float2 = Float2(), var direction: Float2) {
 **/
 
 
-class MotionSystem3(private var startPoint: Ray
+class MotionSystem3(private var startPoint: Ray,
+                    private val maxWidth: Float
 ) {
     //TODO: use calcDirectionDelta only when searching for interim bezier point !!!
     //TODO: ie exclude calcDirectionDelta from constructor
 //    constructor(startPointF: PointF, directionPointF: PointF) : this(Ray(Float2(startPointF.x, startPointF.y),
 //        calcDirectionDelta(startPointF, directionPointF)))
 
-    constructor(startPointF: PointF, directionPointF: PointF) : this(Ray(Float2(startPointF.x, startPointF.y),
-        Float2(directionPointF.x, directionPointF.y)))
+    constructor(startPointF: PointF, directionPointF: PointF, width: Float) : this(Ray(Float2(startPointF.x, startPointF.y),
+        Float2(directionPointF.x, directionPointF.y)), width)
 
 
     private var animator: ValueAnimator? = null
@@ -224,7 +228,17 @@ class MotionSystem3(private var startPoint: Ray
 //            }
 //        }
 
-        val bezierParam = startPoint.direction
+        val bezierParam = when {
+            (startPoint.realAngle > (Math.PI/2 + Math.PI/2) && startPoint.realAngle < (3 * Math.PI/2 + Math.PI/2)) -> {
+                pointAt(startPoint, -startPoint.origin.x, normalize(startPoint.direction))
+            }
+            else -> {
+                pointAt(startPoint, maxWidth - startPoint.origin.x, normalize(startPoint.direction))
+            }
+        }
+
+
+        //val bezierParam = startPoint.direction
 
 //        val bezierParam = Float2(Math.min(startPoint.origin.x, endPoint.origin.x) + Math.abs(startPoint.origin.x - endPoint.origin.x),
 //            Math.min(startPoint.origin.y, endPoint.origin.y) + Math.abs(startPoint.origin.y - endPoint.origin.y))
