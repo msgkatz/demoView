@@ -9,13 +9,8 @@ import android.graphics.Paint
 import android.graphics.PointF
 import android.util.AttributeSet
 import android.view.MotionEvent
-import android.view.VelocityTracker
 import android.view.View
 import android.view.ViewTreeObserver
-import android.R.attr.endY
-import android.R.attr.startY
-import android.R.attr.endX
-import android.R.attr.startX
 import android.view.animation.AccelerateDecelerateInterpolator
 
 
@@ -25,7 +20,7 @@ class MovingPointView(context: Context, attrs: AttributeSet) : View(context, att
     private val ballRadius: Double
         get() = Math.min(width, height) * 0.10 / 4.0
     private var finger: PointF = PointF()
-    private lateinit var system: MovingSystem
+    private lateinit var system: MotionSystem
 
     private val customAnimator: ValueAnimator = ValueAnimator().apply {
 
@@ -33,7 +28,7 @@ class MovingPointView(context: Context, attrs: AttributeSet) : View(context, att
 
     init {
         //val sPoint = PointF(width/2f, height/2f)
-        //system = MovingSystem(sPoint, sPoint, sPoint)
+        //system = MotionSystem(sPoint, sPoint, sPoint)
         viewTreeObserver.addOnPreDrawListener(this)
     }
 
@@ -68,7 +63,7 @@ class MovingPointView(context: Context, attrs: AttributeSet) : View(context, att
         viewTreeObserver.removeOnPreDrawListener(this)
 
         val sPoint = PointF(width/2f, height/2f)
-        system = MovingSystem(sPoint, sPoint, sPoint)
+        system = MotionSystem(sPoint, sPoint, sPoint)
 
         return true
     }
@@ -99,7 +94,7 @@ class MovingPointView(context: Context, attrs: AttributeSet) : View(context, att
 
 }
 
-class MovingSystem constructor(var startPoint: PointF,
+class MotionSystem constructor(var startPoint: PointF,
                                var endPoint: PointF,
                                var curPoint: PointF,
                                private var speed: Float = 0.0f
@@ -138,11 +133,8 @@ class MovingSystem constructor(var startPoint: PointF,
                                           Math.min(startPoint.y, endPoint.y) + Math.abs(startPoint.y - endPoint.y))
         val startValue = Float2Rotation(startPoint.x, startPoint.y)
         val endValue = Float2Rotation(endPoint.x, endPoint.y)
-        var newAnimator = ValueAnimator.ofObject(MovingEvaluator(bezierParams), startValue, endValue).apply {
+        var newAnimator = ValueAnimator.ofObject(MotionEvaluator(bezierParams), startValue, endValue).apply {
             duration = 250
-            // setIntValues(-30, 0, 30)
-            // repeatCount = ValueAnimator.INFINITE
-            // repeatMode = ValueAnimator.REVERSE
             interpolator = AccelerateDecelerateInterpolator()
             //addUpdateListener { invalidate() }
             addUpdateListener {
@@ -162,7 +154,7 @@ data class Float2Rotation(var x: Float = 0.0f, var y: Float = 0.0f, var r: Float
 }
 
 
-class MovingEvaluator(private val bezierParams: Float2Rotation): TypeEvaluator<Float2Rotation> {
+class MotionEvaluator(private val bezierParams: Float2Rotation): TypeEvaluator<Float2Rotation> {
 
 
     override fun evaluate(fraction: Float, startValue: Float2Rotation, endValue: Float2Rotation): Float2Rotation {
@@ -172,3 +164,7 @@ class MovingEvaluator(private val bezierParams: Float2Rotation): TypeEvaluator<F
     }
 
 }
+
+
+
+
