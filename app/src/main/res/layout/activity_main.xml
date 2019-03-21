@@ -8,7 +8,7 @@
 
 
 
-    <com.msgkatz.demoview.custom.MovingPointView2
+    <com.msgkatz.demoview.custom.MovingPointView3
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>
 
