@@ -213,16 +213,18 @@ class MotionSystem3(private var startPoint: Ray
 
         val directionDelta = calcDirectionDelta(startPoint)
 
-        val bezierParam = when {
-            startPoint.origin.x == endPoint.origin.x -> {
-                val dy = Math.abs(startPoint.origin.y - endPoint.origin.y)
-                pointAt(startPoint, dy, directionDelta)
-            }
-            else -> {
-                val dx = Math.abs(startPoint.origin.x - endPoint.origin.x)
-                pointAt(startPoint, dx, directionDelta)
-            }
-        }
+//        val bezierParam = when {
+//            startPoint.origin.x == endPoint.origin.x -> {
+//                val dy = Math.abs(startPoint.origin.y - endPoint.origin.y)
+//                pointAt(startPoint, dy, directionDelta)
+//            }
+//            else -> {
+//                val dx = Math.abs(startPoint.origin.x - endPoint.origin.x)
+//                pointAt(startPoint, dx, directionDelta)
+//            }
+//        }
+
+        val bezierParam = startPoint.direction
 
 //        val bezierParam = Float2(Math.min(startPoint.origin.x, endPoint.origin.x) + Math.abs(startPoint.origin.x - endPoint.origin.x),
 //            Math.min(startPoint.origin.y, endPoint.origin.y) + Math.abs(startPoint.origin.y - endPoint.origin.y))
@@ -360,11 +362,11 @@ class MotionEvaluator3(private val bezierParams: Float2, private val pathMeasure
                 + 2 * (1 - fraction) * fraction * bezierParams.y
                 + fraction * fraction * endValue.origin.y)
 
-        val xDirect = 2 * (1 - fraction) * (bezierParams.x - startValue.origin.x)
-        + 2 * fraction * (endValue.origin.x - bezierParams.x)
+        val xyDirect = recalcDirectV1(fraction, startValue, endValue)
+        val xyDirect2 = recalcDirectV2(fraction, startValue, endValue)
 
-        val yDirect = 2 * (1 - fraction) * (bezierParams.y - startValue.origin.y)
-        + 2 * fraction * (endValue.origin.y - bezierParams.y)
+        val xDirect = xyDirect.x
+        val yDirect = xyDirect.y
 
         var pos: FloatArray = FloatArray(2)
         var tan: FloatArray = FloatArray(2)
@@ -372,10 +374,38 @@ class MotionEvaluator3(private val bezierParams: Float2, private val pathMeasure
 
         val angle = Math.atan2(tan[1].toDouble(), tan[0].toDouble())
         val angle2 = Math.atan2((-yDirect + y).toDouble(), (-xDirect + x).toDouble())
+        val angle3 = Math.atan2(xyDirect2.y.toDouble(), xyDirect2.x.toDouble())
+        val angle4 = Math.atan2(yDirect.toDouble(), xDirect.toDouble())
 
-        //Log.d("tanEq::", "x: (${xDirect - x} or ${tan[0]}, y: ${yDirect - y} or ${tan[1]}); angles: $angle or $angle2")
-        Log.d("direct&&angle::", "Direct: ($xDirect or ${pos[0]}, $yDirect or ${pos[1]}); Angle: Rad=${angle}, Deg=${Math.toDegrees(angle)}")
-        return Ray(Float2(x, y), Float2(xDirect, yDirect), angle)
+        Log.d("tanEq::", "x: (${xDirect} or ${xyDirect2.x} or ${tan[0]}, y: ${yDirect} or ${xyDirect2.y} or ${tan[1]}); angles: $angle or $angle3 or $angle4 or $angle2")
+        //Log.d("direct&&angle::", "Direct: ($xDirect or ${xyDirect.x} or ${pos[0]} or $x, $yDirect or ${xyDirect.y} or ${pos[1]} or $y); Angle: Rad=${angle}, Deg=${Math.toDegrees(angle)}")
+
+        //return Ray(Float2(x, y), Float2(xDirect, yDirect), angle)
+        return Ray(Float2(x, y), xyDirect2, angle)
+    }
+
+    private fun recalcDirectV1(fraction: Float, startValue: Ray, endValue: Ray): Float2 {
+        val xDirect = 2 * (1 - fraction) * (bezierParams.x - startValue.origin.x)
+        + 2 * fraction * (endValue.origin.x - bezierParams.x)
+
+        val yDirect = 2 * (1 - fraction) * (bezierParams.y - startValue.origin.y)
+        + 2 * fraction * (endValue.origin.y - bezierParams.y)
+
+        return Float2(xDirect, yDirect) + Float2(xDirect, yDirect)
+    }
+
+    private fun recalcDirectV2(fraction: Float, startValue: Ray, endValue: Ray): Float2 {
+
+        val B = bezierParams - startValue.origin
+        val A = endValue.origin - bezierParams - B
+        val T = A * fraction + B
+
+        val result = T + T
+
+        val xDirect = 0.0f
+        val yDirect = 0.0f
+
+        return result //Float2(xDirect, yDirect)
     }
 
 }
