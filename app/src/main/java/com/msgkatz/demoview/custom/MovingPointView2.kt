@@ -125,6 +125,16 @@ class MovingPointView2(context: Context, attrs: AttributeSet) : View(context, at
 data class Float2(var x: Float = 0.0f, var y: Float = 0.0f) {
     constructor(v: Float) : this(v, v)
     constructor(v: Float2) : this(v.x, v.y)
+
+    inline operator fun plus(v: Float) = Float2(x + v, y + v)
+    inline operator fun minus(v: Float) = Float2(x - v, y - v)
+    inline operator fun times(v: Float) = Float2(x * v, y * v)
+    inline operator fun div(v: Float) = Float2(x / v, y / v)
+
+    inline operator fun plus(v: Float2) = Float2(x + v.x, y + v.y)
+    inline operator fun minus(v: Float2) = Float2(x - v.x, y - v.y)
+    inline operator fun times(v: Float2) = Float2(x * v.x, y * v.y)
+    inline operator fun div(v: Float2) = Float2(x / v.x, y / v.y)
 }
 
 data class Ray(var origin: Float2 = Float2(), var direction: Float2, var realAngle: Double = 0.0) {
