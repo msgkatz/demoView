@@ -10,6 +10,8 @@ import android.view.View
 import android.view.ViewTreeObserver
 import android.view.animation.AccelerateDecelerateInterpolator
 import com.msgkatz.demoview.R
+import com.msgkatz.demoview.math.Float2
+import com.msgkatz.demoview.math.Ray
 import kotlin.math.roundToInt
 
 class MovingPointView2(context: Context, attrs: AttributeSet) : View(context, attrs), ViewTreeObserver.OnPreDrawListener {
@@ -122,27 +124,7 @@ class MovingPointView2(context: Context, attrs: AttributeSet) : View(context, at
 
 }
 
-data class Float2(var x: Float = 0.0f, var y: Float = 0.0f) {
-    constructor(v: Float) : this(v, v)
-    constructor(v: Float2) : this(v.x, v.y)
 
-    inline operator fun plus(v: Float) = Float2(x + v, y + v)
-    inline operator fun minus(v: Float) = Float2(x - v, y - v)
-    inline operator fun times(v: Float) = Float2(x * v, y * v)
-    inline operator fun div(v: Float) = Float2(x / v, y / v)
-
-    inline operator fun plus(v: Float2) = Float2(x + v.x, y + v.y)
-    inline operator fun minus(v: Float2) = Float2(x - v.x, y - v.y)
-    inline operator fun times(v: Float2) = Float2(x * v.x, y * v.y)
-    inline operator fun div(v: Float2) = Float2(x / v.x, y / v.y)
-}
-
-data class Ray(var origin: Float2 = Float2(), var direction: Float2, var realAngle: Double = 0.0) {
-
-    fun toPointF(): PointF {
-        return PointF(origin.x, origin.y)
-    }
-}
 
 
 class MotionSystem2(private var startPoint: Ray
@@ -153,7 +135,8 @@ class MotionSystem2(private var startPoint: Ray
 //        calcDirectionDelta(startPointF, directionPointF)))
 
     constructor(startPointF: PointF, directionPointF: PointF) : this(Ray(Float2(startPointF.x, startPointF.y),
-        Float2(directionPointF.x, directionPointF.y)))
+        Float2(directionPointF.x, directionPointF.y)
+    ))
 
 
     private var animator: ValueAnimator? = null
