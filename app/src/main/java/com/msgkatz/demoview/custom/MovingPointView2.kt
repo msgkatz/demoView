@@ -122,86 +122,12 @@ class MovingPointView2(context: Context, attrs: AttributeSet) : View(context, at
 
 }
 
-/**
-class MotionSystem constructor(var startPoint: PointF,
-                               var endPoint: PointF,
-                               var curPoint: PointF,
-                               private var speed: Float = 0.0f
-) {
-
-    //private var vt: VelocityTracker = null
-
-    private var animator: ValueAnimator? = null
-
-    fun updateEndPoint(newPoint: PointF) {
-        startPoint = curPoint
-        endPoint = newPoint
-        updateAnimator()
-
-        //curPoint = newPoint
-        //endPoint = newPoint
-    }
-
-    fun getNextPoint(time: Long): PointF {
-
-        return when {
-            (curPoint == endPoint) -> curPoint
-            else -> recalcNextPoint(time)
-        }
-
-    }
-
-    private fun recalcNextPoint(time: Long): PointF {
-        return curPoint
-    }
-
-    private fun updateAnimator() {
-        animator?.end()
-
-        val bezierParams = Float2Rotation(Math.min(startPoint.x, endPoint.x) + Math.abs(startPoint.x - endPoint.x),
-            Math.min(startPoint.y, endPoint.y) + Math.abs(startPoint.y - endPoint.y))
-        val startValue = Float2Rotation(startPoint.x, startPoint.y)
-        val endValue = Float2Rotation(endPoint.x, endPoint.y)
-        var newAnimator = ValueAnimator.ofObject(MotionEvaluator(bezierParams), startValue, endValue).apply {
-            duration = 250
-            interpolator = AccelerateDecelerateInterpolator()
-            //addUpdateListener { invalidate() }
-            addUpdateListener {
-                val interimValue = animatedValue as Float2Rotation
-                curPoint = PointF(interimValue.x, interimValue.y)
-            }
-        }
-
-        animator = newAnimator
-        animator?.start()
-    }
-}
-
-data class Float2Rotation(var x: Float = 0.0f, var y: Float = 0.0f, var r: Float = 0.0f) {
-    constructor(v: Float) : this(v, v)
-    constructor(v: Float2Rotation) : this(v.x, v.y, v.r)
-}
-
-
-class MotionEvaluator(private val bezierParams: Float2Rotation): TypeEvaluator<Float2Rotation> {
-
-
-    override fun evaluate(fraction: Float, startValue: Float2Rotation, endValue: Float2Rotation): Float2Rotation {
-        val x = ((1 - fraction) * (1 - fraction) * startValue.x + 2 * (1 - fraction) * fraction * bezierParams.x + fraction * fraction * endValue.x)
-        val y = ((1 - fraction) * (1 - fraction) * startValue.y + 2 * (1 - fraction) * fraction * bezierParams.y + fraction * fraction * endValue.y)
-        return Float2Rotation(x, y)
-    }
-
-}
-
-**/
-
 data class Float2(var x: Float = 0.0f, var y: Float = 0.0f) {
     constructor(v: Float) : this(v, v)
     constructor(v: Float2) : this(v.x, v.y)
 }
 
-data class Ray(var origin: Float2 = Float2(), var direction: Float2) {
+data class Ray(var origin: Float2 = Float2(), var direction: Float2, var realAngle: Double = 0.0) {
 
     fun toPointF(): PointF {
         return PointF(origin.x, origin.y)
