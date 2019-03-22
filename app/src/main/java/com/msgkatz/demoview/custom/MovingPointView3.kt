@@ -73,7 +73,7 @@ class MovingPointView3(context: Context, attrs: AttributeSet) : View(context, at
         viewTreeObserver.removeOnPreDrawListener(this)
 
         val sPoint = PointF(width/2f, height/1.5f)
-        val dPoint = PointF(width/2f, height/2f)
+        val dPoint = PointF(width/2.5f, -height/2.5f)
         system = MotionSystem3(sPoint, dPoint, width.toFloat())
 
         return true
@@ -170,7 +170,9 @@ class MotionSystem3(private var startPoint: Ray,
 //        calcDirectionDelta(startPointF, directionPointF)))
 
     constructor(startPointF: PointF, directionPointF: PointF, width: Float) : this(Ray(Float2(startPointF.x, startPointF.y),
-        Float2(directionPointF.x, directionPointF.y)), width)
+        //Float2(directionPointF.x, directionPointF.y),
+        calcStartingDirection(Float2(directionPointF.x, directionPointF.y)),
+        Math.PI), width)
 
 
     private var animator: ValueAnimator? = null
@@ -192,8 +194,8 @@ class MotionSystem3(private var startPoint: Ray,
 
 
         val endDirection = when {
-            curPoint.origin.y > newPoint.y -> Float2(newPoint.x, newPoint.y - 1)
-            else -> Float2(newPoint.x, newPoint.y + 1)
+            curPoint.origin.y > newPoint.y -> Float2(newPoint.x - 10, newPoint.y - 10)
+            else -> Float2(newPoint.x + 10, newPoint.y + 10)
         }
         //endPoint = Ray(Float2(newPoint.x, newPoint.y), Float2())
         endPoint = Ray(Float2(newPoint.x, newPoint.y), endDirection)
@@ -353,6 +355,21 @@ class MotionSystem3(private var startPoint: Ray,
 
         fun pointAt(ray: Ray, delta: Float, directionDelta: Float2): Float2 {
             return Float2(ray.origin.x + directionDelta.x * delta, ray.origin.y + directionDelta.y * delta)
+        }
+
+        fun calcStartingDirection(startValue: Float2): Float2 {
+
+            val fraction = 0.0f
+            val endValue = Float2(0.0f, startValue.y - startValue.x)
+            val bezierParams = Float2(startValue.x, endValue.y)
+
+            val B = bezierParams - startValue
+            val A = endValue - bezierParams - B
+            val T = A * fraction + B
+
+            val result = T + T
+
+            return result
         }
     }
 
