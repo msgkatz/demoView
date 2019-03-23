@@ -260,6 +260,10 @@ class MotionEvaluator3(private val bezierParams: Float2, private val pathMeasure
                 + 2 * (1 - fraction) * fraction * bezierParams.y
                 + fraction * fraction * endValue.origin.y)
 
+        val point = (startValue.origin * (1.0f - fraction) * (1.0f - fraction)
+                + bezierParams * 2.0f * (1.0f - fraction) * fraction
+                + endValue.origin * fraction * fraction)
+
         val xyDirect = recalcDirectV1(fraction, startValue, endValue)
         val xyDirect2 = recalcDirectV2(fraction, startValue, endValue)
 
@@ -278,8 +282,8 @@ class MotionEvaluator3(private val bezierParams: Float2, private val pathMeasure
         Log.d("tanEq::", "x: (${xDirect} or ${xyDirect2.x} or ${tan[0]}, y: ${yDirect} or ${xyDirect2.y} or ${tan[1]}); angles: $angle or $angle3 or $angle4 or $angle2")
         //Log.d("direct&&angle::", "Direct: ($xDirect or ${xyDirect.x} or ${pos[0]} or $x, $yDirect or ${xyDirect.y} or ${pos[1]} or $y); Angle: Rad=${angle}, Deg=${Math.toDegrees(angle)}")
 
-        //return Ray(Float2(x, y), Float2(xDirect, yDirect), angle)
-        return Ray(Float2(x, y), xyDirect2, angle)
+        return Ray(point, xyDirect2, angle)
+        //return Ray(Float2(x, y), xyDirect2, angle)
     }
 
     private fun recalcDirectV1(fraction: Float, startValue: Ray, endValue: Ray): Float2 {
@@ -298,12 +302,7 @@ class MotionEvaluator3(private val bezierParams: Float2, private val pathMeasure
         val A = endValue.origin - bezierParams - B
         val T = A * fraction + B
 
-        val result = T + T
-
-        val xDirect = 0.0f
-        val yDirect = 0.0f
-
-        return result //Float2(xDirect, yDirect)
+        return T + T
     }
 
 }
