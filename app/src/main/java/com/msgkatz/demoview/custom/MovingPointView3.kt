@@ -11,9 +11,7 @@ import android.view.View
 import android.view.ViewTreeObserver
 import android.view.animation.AccelerateDecelerateInterpolator
 import com.msgkatz.demoview.R
-import com.msgkatz.demoview.math.Float2
-import com.msgkatz.demoview.math.Ray
-import com.msgkatz.demoview.math.normalize
+import com.msgkatz.demoview.math.*
 import kotlin.math.roundToInt
 
 
@@ -31,9 +29,6 @@ class MovingPointView3(context: Context, attrs: AttributeSet) : View(context, at
     //private val objectPath: Path = DrawablePathHelper.getCarOfSize(objectSize.roundToInt())
     private val objectPath: Path = DrawablePathHelper.getArrowOfSize(objectSize.roundToInt())
 
-    private val customAnimator: ValueAnimator = ValueAnimator().apply {
-
-    }
 
     init {
         //val sPoint = PointF(width/2f, height/2f)
@@ -146,31 +141,10 @@ class MovingPointView3(context: Context, attrs: AttributeSet) : View(context, at
 
 }
 
-/**
-data class Float2(var x: Float = 0.0f, var y: Float = 0.0f) {
-    constructor(v: Float) : this(v, v)
-    constructor(v: Float2) : this(v.x, v.y)
-}
-
-data class Ray(var origin: Float2 = Float2(), var direction: Float2) {
-
-    fun toPointF(): PointF {
-        return PointF(origin.x, origin.y)
-    }
-}
-**/
-
-
 class MotionSystem3(private var startPoint: Ray,
                     private val maxWidth: Float
 ) {
-    //TODO: use calcDirectionDelta only when searching for interim bezier point !!!
-    //TODO: ie exclude calcDirectionDelta from constructor
-//    constructor(startPointF: PointF, directionPointF: PointF) : this(Ray(Float2(startPointF.x, startPointF.y),
-//        calcDirectionDelta(startPointF, directionPointF)))
-
     constructor(startPointF: PointF, directionPointF: PointF, width: Float) : this(Ray(Float2(startPointF.x, startPointF.y),
-        //Float2(directionPointF.x, directionPointF.y),
         calcStartingDirection(Float2(directionPointF.x, directionPointF.y)),
         Math.PI), width)
 
@@ -186,7 +160,6 @@ class MotionSystem3(private var startPoint: Ray,
         curPoint = startPoint
         endPoint = startPoint
         curPointCalculated = Float2Rotation(startPoint.origin.x, startPoint.origin.y, 0.0f)
-        //Math.toDegrees(calcAngle(startPoint)).toFloat())
     }
 
     fun updateEndPoint(newPoint: PointF) {
@@ -197,7 +170,7 @@ class MotionSystem3(private var startPoint: Ray,
             curPoint.origin.y > newPoint.y -> Float2(newPoint.x - 10, newPoint.y - 10)
             else -> Float2(newPoint.x + 10, newPoint.y + 10)
         }
-        //endPoint = Ray(Float2(newPoint.x, newPoint.y), Float2())
+
         endPoint = Ray(Float2(newPoint.x, newPoint.y), endDirection)
         updateAnimator()
         Log.d("new points::", "curPoint: ${curPoint}, endPoint: ${endPoint}")
@@ -217,33 +190,14 @@ class MotionSystem3(private var startPoint: Ray,
         val startValue = startPoint
         val endValue = endPoint
 
-        val directionDelta = calcDirectionDelta(startPoint)
-
-//        val bezierParam = when {
-//            startPoint.origin.x == endPoint.origin.x -> {
-//                val dy = Math.abs(startPoint.origin.y - endPoint.origin.y)
-//                pointAt(startPoint, dy, directionDelta)
-//            }
-//            else -> {
-//                val dx = Math.abs(startPoint.origin.x - endPoint.origin.x)
-//                pointAt(startPoint, dx, directionDelta)
-//            }
-//        }
-
         val bezierParam = when {
             (startPoint.realAngle > (Math.PI/2 + Math.PI/2) && startPoint.realAngle < (3 * Math.PI/2 + Math.PI/2)) -> {
-                pointAt(startPoint, -startPoint.origin.x, normalize(startPoint.direction))
+                pointAt(startPoint, -startPoint.origin.x)
             }
             else -> {
-                pointAt(startPoint, maxWidth - startPoint.origin.x, normalize(startPoint.direction))
+                pointAt(startPoint, maxWidth - startPoint.origin.x)
             }
         }
-
-
-        //val bezierParam = startPoint.direction
-
-//        val bezierParam = Float2(Math.min(startPoint.origin.x, endPoint.origin.x) + Math.abs(startPoint.origin.x - endPoint.origin.x),
-//            Math.min(startPoint.origin.y, endPoint.origin.y) + Math.abs(startPoint.origin.y - endPoint.origin.y))
 
         buildPath(bezierParam)
 
@@ -254,28 +208,9 @@ class MotionSystem3(private var startPoint: Ray,
             addUpdateListener {
                 val interimValue = animatedValue as Ray
                 curPoint = interimValue
-
-                val angleDeg = Math.toDegrees(interimValue.realAngle).toFloat()
-                var t = 360 - angleDeg
-                if (t < 0) {
-                    t += 360f
-                }
-                if (t > 360) {
-                    t -= 360f
-                }
-                //help smooth everything out
-                t = t.toInt().toFloat()
-                t = t / 5
-                t = t.toInt().toFloat()
-                t = t * 5
                 curPointCalculated = Float2Rotation(interimValue.origin.x, interimValue.origin.y,
-                    //t)
                     Math.toDegrees(interimValue.realAngle).toFloat() + 90)
-                    //Math.toDegrees(calcAngle(interimValue)).toFloat())
 
-
-//                curPointCalculated = Float2Rotation(interimValue.origin.x, interimValue.origin.y,
-//                    curPointCalculated.r - Math.toDegrees(clamp(prevAngle - newAngle, - MAX_ANGLE, MAX_ANGLE)).toFloat())
             }
         }
 
@@ -291,71 +226,9 @@ class MotionSystem3(private var startPoint: Ray,
 
         pathMeasure.setPath(p, false)
 
-
-        //pathMeasure.getPosTan()
-
     }
 
-
-
     companion object {
-
-        private val MAX_ANGLE = 1e-1
-
-        fun calcAngle(ray: Ray): Double {
-//            val deltaX = (ray.origin.x - ray.direction.x).toDouble()
-//            val deltaY = (ray.origin.y - ray.direction.y).toDouble()
-
-            val deltaX = (ray.direction.x - ray.origin.x).toDouble()
-            val deltaY = (ray.direction.y - ray.origin.y).toDouble()
-
-            return Math.atan2(deltaY, deltaX)
-        }
-
-        fun clamp(value: Double, min: Double, max: Double): Double {
-            if (value < min) {
-                return min
-            }
-            return if (value > max) {
-                max
-            } else value
-        }
-
-        fun calcDirectionDelta(ray: Ray): Float2 {
-            val deltaX = ray.direction.x - ray.origin.x
-            val deltaY = ray.direction.y - ray.origin.y
-
-            return when (deltaX) {
-                0.0f -> {
-                    val angle = calcAngle(ray)
-                    if (angle > 0 && angle < Math.PI)
-                        Float2(0.0f, 1.0f)
-                    else
-                        Float2(0.0f, -1.0f)
-                }
-                else -> Float2(1.0f, deltaY/deltaX)
-            }
-        }
-
-        fun calcDirectionDelta(p0: PointF, p1: PointF): Float2 {
-            val deltaX = p1.x - p0.x
-            val deltaY = p1.y - p0.y
-
-            return when (deltaX) {
-                0.0f -> {
-                    val angle = calcAngle(Ray(Float2(p0.x, p0.y), Float2(p1.x, p1.y)))
-                    if (angle > 0 && angle < Math.PI)
-                        Float2(0.0f, -1.0f)
-                    else
-                        Float2(0.0f, 1.0f)
-                }
-                else -> Float2(1.0f, deltaY/deltaX)
-            }
-        }
-
-        fun pointAt(ray: Ray, delta: Float, directionDelta: Float2): Float2 {
-            return Float2(ray.origin.x + directionDelta.x * delta, ray.origin.y + directionDelta.y * delta)
-        }
 
         fun calcStartingDirection(startValue: Float2): Float2 {
 
@@ -373,12 +246,6 @@ class MotionSystem3(private var startPoint: Ray,
         }
     }
 
-//    private fun calcDirectionDelta(p0: PointF, p1: PointF): Float2 {
-//        val deltaX = p1.x - p0.x
-//        val deltaY = p1.y - p0.y
-//
-//        return Float2(1.0f, deltaY/deltaX)
-//    }
 }
 
 class MotionEvaluator3(private val bezierParams: Float2, private val pathMeasure: PathMeasure): TypeEvaluator<Ray> {

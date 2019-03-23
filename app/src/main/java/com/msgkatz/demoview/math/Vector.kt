@@ -18,6 +18,11 @@ data class Float2(var x: Float = 0.0f, var y: Float = 0.0f) {
     inline operator fun div(v: Float2) = Float2(x / v.x, y / v.y)
 }
 
+data class Float2Rotation(var x: Float = 0.0f, var y: Float = 0.0f, var r: Float = 0.0f) {
+    constructor(v: Float) : this(v, v)
+    constructor(v: Float2Rotation) : this(v.x, v.y, v.r)
+}
+
 inline fun abs(v: Float2) = Float2(abs(v.x), abs(v.y))
 inline fun length(v: Float2) = sqrt(v.x * v.x + v.y * v.y)
 inline fun length2(v: Float2) = v.x * v.x + v.y * v.y

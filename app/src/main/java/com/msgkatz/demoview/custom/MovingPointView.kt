@@ -12,6 +12,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewTreeObserver
 import android.view.animation.AccelerateDecelerateInterpolator
+import com.msgkatz.demoview.math.Float2Rotation
 
 
 class MovingPointView(context: Context, attrs: AttributeSet) : View(context, attrs), ViewTreeObserver.OnPreDrawListener {
@@ -148,10 +149,7 @@ class MotionSystem constructor(var startPoint: PointF,
     }
 }
 
-data class Float2Rotation(var x: Float = 0.0f, var y: Float = 0.0f, var r: Float = 0.0f) {
-    constructor(v: Float) : this(v, v)
-    constructor(v: Float2Rotation) : this(v.x, v.y, v.r)
-}
+
 
 
 class MotionEvaluator(private val bezierParams: Float2Rotation): TypeEvaluator<Float2Rotation> {

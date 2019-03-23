@@ -11,6 +11,7 @@ import android.view.ViewTreeObserver
 import android.view.animation.AccelerateDecelerateInterpolator
 import com.msgkatz.demoview.R
 import com.msgkatz.demoview.math.Float2
+import com.msgkatz.demoview.math.Float2Rotation
 import com.msgkatz.demoview.math.Ray
 import kotlin.math.roundToInt
 
