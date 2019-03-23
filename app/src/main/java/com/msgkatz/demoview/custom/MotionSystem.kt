@@ -4,13 +4,9 @@ import android.animation.TypeEvaluator
 import android.animation.ValueAnimator
 import android.graphics.Path
 import android.graphics.PathMeasure
-import android.graphics.PointF
 import android.util.Log
 import android.view.animation.AccelerateDecelerateInterpolator
-import com.msgkatz.demoview.math.Float2
-import com.msgkatz.demoview.math.Float2Rotation
-import com.msgkatz.demoview.math.Ray
-import com.msgkatz.demoview.math.pointAt
+import com.msgkatz.demoview.math.*
 
 class MotionSystem(private var startPoint: Ray,
                    private val maxWidth: Float
@@ -93,7 +89,6 @@ class MotionSystem(private var startPoint: Ray,
         }
 
         pathMeasure.setPath(p, false)
-
     }
 
     companion object {
@@ -104,13 +99,7 @@ class MotionSystem(private var startPoint: Ray,
             val endValue = Float2(0.0f, startValue.y - startValue.x)
             val bezierParams = Float2(startValue.x, endValue.y)
 
-            val B = bezierParams - startValue
-            val A = endValue - bezierParams - B
-            val T = A * fraction + B
-
-            val result = T + T
-
-            return result
+            return evalQuadTangentAt(fraction, startValue, bezierParams, endValue)
         }
     }
 
@@ -120,17 +109,8 @@ class MotionEvaluator(private val bezierParams: Float2, private val pathMeasure:
 
 
     override fun evaluate(fraction: Float, startValue: Ray, endValue: Ray): Ray {
-        //Log.d("fraction=", "$fraction")
-        val x = ((1 - fraction) * (1 - fraction) * startValue.origin.x
-                + 2 * (1 - fraction) * fraction * bezierParams.x
-                + fraction * fraction * endValue.origin.x)
-        val y = ((1 - fraction) * (1 - fraction) * startValue.origin.y
-                + 2 * (1 - fraction) * fraction * bezierParams.y
-                + fraction * fraction * endValue.origin.y)
 
-        val point = (startValue.origin * (1.0f - fraction) * (1.0f - fraction)
-                + bezierParams * 2.0f * (1.0f - fraction) * fraction
-                + endValue.origin * fraction * fraction)
+        val point = evalQuadAt(fraction, startValue.origin, bezierParams, endValue.origin)
 
         val xyDirect = recalcDirectV1(fraction, startValue, endValue)
         val xyDirect2 = recalcDirectV2(fraction, startValue, endValue)
@@ -143,8 +123,9 @@ class MotionEvaluator(private val bezierParams: Float2, private val pathMeasure:
         pathMeasure.getPosTan(pathMeasure.length * fraction, pos, tan)
 
         val angle = Math.atan2(tan[1].toDouble(), tan[0].toDouble())
-        val angle2 = Math.atan2((-yDirect + y).toDouble(), (-xDirect + x).toDouble())
         val angle3 = Math.atan2(xyDirect2.y.toDouble(), xyDirect2.x.toDouble())
+
+        val angle2 = Math.atan2((-yDirect + point.y).toDouble(), (-xDirect + point.x).toDouble())
         val angle4 = Math.atan2(yDirect.toDouble(), xDirect.toDouble())
 
         Log.d("tanEq::", "x: (${xDirect} or ${xyDirect2.x} or ${tan[0]}, y: ${yDirect} or ${xyDirect2.y} or ${tan[1]}); angles: $angle or $angle3 or $angle4 or $angle2")
@@ -161,16 +142,10 @@ class MotionEvaluator(private val bezierParams: Float2, private val pathMeasure:
         val yDirect = 2 * (1 - fraction) * (bezierParams.y - startValue.origin.y)
         + 2 * fraction * (endValue.origin.y - bezierParams.y)
 
-        return Float2(xDirect, yDirect) + Float2(xDirect, yDirect)
+        return Float2(xDirect, yDirect) //+ Float2(xDirect, yDirect)
     }
 
-    private fun recalcDirectV2(fraction: Float, startValue: Ray, endValue: Ray): Float2 {
-
-        val B = bezierParams - startValue.origin
-        val A = endValue.origin - bezierParams - B
-        val T = A * fraction + B
-
-        return T + T
-    }
+    private fun recalcDirectV2(fraction: Float, startValue: Ray, endValue: Ray): Float2
+        = evalQuadTangentAt(fraction, startValue.origin, bezierParams, endValue.origin)
 
 }

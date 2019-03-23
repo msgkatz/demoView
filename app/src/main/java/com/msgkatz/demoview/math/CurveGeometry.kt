@@ -11,7 +11,7 @@ package com.msgkatz.demoview.math
  * @param endValue - end point c of a curve
  *
  * */
-private fun EvalQuadAt(fraction: Float, startValue: Float2, midValue: Float2, endValue: Float2): Float2 {
+fun evalQuadAt(fraction: Float, startValue: Float2, midValue: Float2, endValue: Float2): Float2 {
 
     return (startValue * (1.0f - fraction) * (1.0f - fraction)
             + midValue * 2.0f * (1.0f - fraction) * fraction
@@ -33,7 +33,7 @@ private fun EvalQuadAt(fraction: Float, startValue: Float2, midValue: Float2, en
  * @param endValue - end point c of a curve
  *
  * */
-private fun EvalQuadTangentAt(fraction: Float, startValue: Float2, midValue: Float2, endValue: Float2): Float2 {
+fun evalQuadTangentAt(fraction: Float, startValue: Float2, midValue: Float2, endValue: Float2): Float2 {
 
     val B = midValue - startValue
     val A = endValue - midValue - B
