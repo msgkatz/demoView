@@ -1,15 +1,11 @@
 package com.msgkatz.demoview.custom
 
-import android.animation.TypeEvaluator
-import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
-import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewTreeObserver
-import android.view.animation.AccelerateDecelerateInterpolator
 import com.msgkatz.demoview.R
 import com.msgkatz.demoview.math.*
 import kotlin.math.roundToInt
@@ -26,12 +22,8 @@ class MotionView(context: Context, attrs: AttributeSet) : View(context, attrs), 
     //private val objectPath: Path = DrawablePathHelper.getCarOfSize(objectSize.roundToInt())
     private val objectPath: Path = DrawablePathHelper.getArrowOfSize(objectSize.roundToInt())
 
-
     init {
-        //val sPoint = PointF(width/2f, height/2f)
-        //system = MotionSystem(sPoint, sPoint, sPoint)
         viewTreeObserver.addOnPreDrawListener(this)
-
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
@@ -48,8 +40,7 @@ class MotionView(context: Context, attrs: AttributeSet) : View(context, attrs), 
             MotionEvent.ACTION_DOWN -> {
                 finger.set(event.x, event.y)
 
-                system.updateEndPoint(finger)
-                //calc new moving path
+                system.updateEndPoint(Float2.fromPointF(finger))
 
                 invalidate() //TODO: do we really need to invalidate here? - seems like we do
 
@@ -65,8 +56,7 @@ class MotionView(context: Context, attrs: AttributeSet) : View(context, attrs), 
         viewTreeObserver.removeOnPreDrawListener(this)
 
         val sPoint = PointF(width/2f, height/1.5f)
-        val dPoint = PointF(width/2.5f, -height/2.5f)
-        system = MotionSystem(sPoint, dPoint, width.toFloat())
+        system = MotionSystem(Float2.fromPointF(sPoint), width.toFloat())
 
         return true
     }
@@ -85,38 +75,33 @@ class MotionView(context: Context, attrs: AttributeSet) : View(context, attrs), 
     }
 
     private fun drawObject2(canvas: Canvas, time: Long) {
-        val newPoint = system.getNextPoint(time)
+        val newPoint = system.getNextPoint()
         canvas.save()
 
         canvas.translate(newPoint.x, newPoint.y)
         canvas.rotate(newPoint.r)
-        //paint.style = Paint.Style.STROKE //.FILL
+
         paint.style = Paint.Style.FILL
         paint.color = Color.BLUE
         canvas.drawPath(objectPath, paint)
-
 
         canvas.restore()
     }
 
     private fun drawDirect(canvas: Canvas) {
-        val newPoint = system.getNextPoint2()
+        val newPoint = system.getNextRay()
         canvas.save()
 
-        //canvas.translate(newPoint.origin.x, newPoint.origin.y)
-
-        //paint.style = Paint.Style.STROKE //.FILL
         paint.style = Paint.Style.FILL
         paint.color = Color.GREEN
 
         canvas.drawLine(newPoint.origin.x, newPoint.origin.y, newPoint.direction.x, newPoint.direction.y, paint)
 
-
         canvas.restore()
     }
 
     private fun drawObject(canvas: Canvas, time: Long) {
-        val newPoint = system.getNextPoint(time)
+        val newPoint = system.getNextPoint()
         canvas.save()
 
         /**
@@ -134,6 +119,10 @@ class MotionView(context: Context, attrs: AttributeSet) : View(context, attrs), 
         canvas.drawCircle(0f, 0f, ballRadius.toFloat(), paint)
 
         canvas.restore()
+    }
+
+    private inline fun Float2.Companion.fromPointF(point: PointF): Float2 {
+        return Float2(point.x, point.y)
     }
 
 }

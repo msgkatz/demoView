@@ -15,12 +15,8 @@ import com.msgkatz.demoview.math.pointAt
 class MotionSystem(private var startPoint: Ray,
                    private val maxWidth: Float
 ) {
-    constructor(startPointF: PointF, directionPointF: PointF, width: Float) : this(
-        Ray(
-            Float2(startPointF.x, startPointF.y),
-            calcStartingDirection(Float2(directionPointF.x, directionPointF.y)),
-            Math.PI), width)
-
+    constructor(startPoint: Float2, width: Float) : this(
+        Ray(startPoint, calcStartingDirection(startPoint), Math.PI), width)
 
     private var animator: ValueAnimator? = null
 
@@ -35,25 +31,24 @@ class MotionSystem(private var startPoint: Ray,
         curPointCalculated = Float2Rotation(startPoint.origin.x, startPoint.origin.y, 0.0f)
     }
 
-    fun updateEndPoint(newPoint: PointF) {
+    fun updateEndPoint(newPoint: Float2) {
         startPoint = curPoint
-
 
         val endDirection = when {
             curPoint.origin.y > newPoint.y -> Float2(newPoint.x - 10, newPoint.y - 10)
             else -> Float2(newPoint.x + 10, newPoint.y + 10)
         }
 
-        endPoint = Ray(Float2(newPoint.x, newPoint.y), endDirection)
+        endPoint = Ray(newPoint, endDirection)
         updateAnimator()
         Log.d("new points::", "curPoint: ${curPoint}, endPoint: ${endPoint}")
     }
 
-    fun getNextPoint(time: Long): Float2Rotation {
+    fun getNextPoint(): Float2Rotation {
         return curPointCalculated
     }
 
-    fun getNextPoint2(): Ray {
+    fun getNextRay(): Ray {
         return curPoint
     }
 

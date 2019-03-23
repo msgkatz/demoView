@@ -16,6 +16,8 @@ data class Float2(var x: Float = 0.0f, var y: Float = 0.0f) {
     inline operator fun minus(v: Float2) = Float2(x - v.x, y - v.y)
     inline operator fun times(v: Float2) = Float2(x * v.x, y * v.y)
     inline operator fun div(v: Float2) = Float2(x / v.x, y / v.y)
+
+    companion object { } // For extensions
 }
 
 data class Float2Rotation(var x: Float = 0.0f, var y: Float = 0.0f, var r: Float = 0.0f) {
