@@ -19,7 +19,6 @@ object DrawablePathHelper {
             quadTo(0f, 50f, 0f, 42f)
             close()
 
-
             moveTo(3f, 16f)
             quadTo(10.5f, 14f, 18f, 16f)
             lineTo(15f, 28f)

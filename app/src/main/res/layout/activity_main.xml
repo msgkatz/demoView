@@ -6,11 +6,8 @@
         android:layout_height="match_parent"
         tools:context=".MainActivity">
 
-
-
-    <com.msgkatz.demoview.custom.MovingPointView3
+    <com.msgkatz.demoview.custom.MotionView
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>
