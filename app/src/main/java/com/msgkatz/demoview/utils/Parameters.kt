@@ -4,6 +4,6 @@ class Parameters {
 
     companion object {
 
-        const val DEBUG: Boolean = true
+        const val DEBUG: Boolean = false
     }
 }
