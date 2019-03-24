@@ -4,9 +4,9 @@ import android.animation.TypeEvaluator
 import android.animation.ValueAnimator
 import android.graphics.Path
 import android.graphics.PathMeasure
-import android.util.Log
 import android.view.animation.AccelerateDecelerateInterpolator
 import com.msgkatz.demoview.math.*
+import com.msgkatz.demoview.utils.Logs
 
 class MotionSystem(private var startPoint: Ray,
                    private val maxWidth: Float
@@ -37,7 +37,7 @@ class MotionSystem(private var startPoint: Ray,
 
         endPoint = Ray(newPoint, endDirection)
         updateAnimator()
-        Log.d("new points::", "curPoint: ${curPoint}, endPoint: ${endPoint}")
+        Logs.d("new points::", "curPoint: ${curPoint}, endPoint: ${endPoint}")
     }
 
     fun getNextPoint(): Float2Rotation {
@@ -121,7 +121,7 @@ class MotionEvaluator(private val bezierParams: Float2, private val pathMeasure:
         val angle = Math.atan2(tan[1].toDouble(), tan[0].toDouble())
         val angle2 = Math.atan2(xyDirection.y.toDouble(), xyDirection.x.toDouble())
 
-        Log.d("tanEq::", "x: (${xyDirection.x} or ${tan[0]}, y: ${xyDirection.y} or ${tan[1]}); angles: $angle or $angle2")
+        Logs.d("tanEq::", "x: (${xyDirection.x} or ${tan[0]}, y: ${xyDirection.y} or ${tan[1]}); angles: $angle or $angle2")
 
         return Ray(xyPoint, xyDirection, angle)
     }
