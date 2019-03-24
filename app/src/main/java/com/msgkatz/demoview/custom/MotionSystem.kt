@@ -102,11 +102,9 @@ class MotionSystem(private var startPoint: Ray,
             return evalQuadTangentAt(fraction, startValue, bezierParams, endValue)
         }
     }
-
 }
 
 class MotionEvaluator(private val bezierParams: Float2, private val pathMeasure: PathMeasure): TypeEvaluator<Ray> {
-
 
     override fun evaluate(fraction: Float, startValue: Ray, endValue: Ray): Ray {
 
@@ -135,15 +133,18 @@ class MotionEvaluator(private val bezierParams: Float2, private val pathMeasure:
         //return Ray(Float2(x, y), xyDirect2, angle)
     }
 
-    private fun recalcDirectV1(fraction: Float, startValue: Ray, endValue: Ray): Float2 {
-        val xDirect = 2 * (1 - fraction) * (bezierParams.x - startValue.origin.x)
-        + 2 * fraction * (endValue.origin.x - bezierParams.x)
-
-        val yDirect = 2 * (1 - fraction) * (bezierParams.y - startValue.origin.y)
-        + 2 * fraction * (endValue.origin.y - bezierParams.y)
-
-        return Float2(xDirect, yDirect) //+ Float2(xDirect, yDirect)
-    }
+    private fun recalcDirectV1(fraction: Float, startValue: Ray, endValue: Ray): Float2
+        = evalQuadTangentAtV2(fraction, startValue.origin, bezierParams, endValue.origin)
+//
+//    {
+//        val xDirect = 2 * (1 - fraction) * (bezierParams.x - startValue.origin.x)
+//        + 2 * fraction * (endValue.origin.x - bezierParams.x)
+//
+//        val yDirect = 2 * (1 - fraction) * (bezierParams.y - startValue.origin.y)
+//        + 2 * fraction * (endValue.origin.y - bezierParams.y)
+//
+//        return Float2(xDirect, yDirect) //+ Float2(xDirect, yDirect)
+//    }
 
     private fun recalcDirectV2(fraction: Float, startValue: Ray, endValue: Ray): Float2
         = evalQuadTangentAt(fraction, startValue.origin, bezierParams, endValue.origin)
