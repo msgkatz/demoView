@@ -68,7 +68,6 @@ class MotionSystem(private var startPoint: Ray,
         var newAnimator = ValueAnimator.ofObject(MotionEvaluator(bezierParam, pathMeasure), startValue, endValue).apply {
             duration = 800 * 2
             interpolator = AccelerateDecelerateInterpolator()
-            //addUpdateListener { invalidate() }
             addUpdateListener {
                 val interimValue = animatedValue as Ray
                 curPoint = interimValue
@@ -108,45 +107,23 @@ class MotionEvaluator(private val bezierParams: Float2, private val pathMeasure:
 
     override fun evaluate(fraction: Float, startValue: Ray, endValue: Ray): Ray {
 
-        val point = evalQuadAt(fraction, startValue.origin, bezierParams, endValue.origin)
-
-        val xyDirect = recalcDirectV1(fraction, startValue, endValue)
-        val xyDirect2 = recalcDirectV2(fraction, startValue, endValue)
-
-        val xDirect = xyDirect.x
-        val yDirect = xyDirect.y
+        val xyPoint = evalQuadAt(fraction, startValue.origin, bezierParams, endValue.origin)
+        val xyDirection = evalQuadTangentAt(fraction, startValue.origin, bezierParams, endValue.origin)
 
         var pos: FloatArray = FloatArray(2)
         var tan: FloatArray = FloatArray(2)
         pathMeasure.getPosTan(pathMeasure.length * fraction, pos, tan)
 
+        /**
+         * xyDirection-based angle calculation works ok,
+         * but PathMeasure-based angle calculation gives little bit smoother result
+         */
         val angle = Math.atan2(tan[1].toDouble(), tan[0].toDouble())
-        val angle3 = Math.atan2(xyDirect2.y.toDouble(), xyDirect2.x.toDouble())
+        val angle2 = Math.atan2(xyDirection.y.toDouble(), xyDirection.x.toDouble())
 
-        val angle2 = Math.atan2((-yDirect + point.y).toDouble(), (-xDirect + point.x).toDouble())
-        val angle4 = Math.atan2(yDirect.toDouble(), xDirect.toDouble())
+        Log.d("tanEq::", "x: (${xyDirection.x} or ${tan[0]}, y: ${xyDirection.y} or ${tan[1]}); angles: $angle or $angle2")
 
-        Log.d("tanEq::", "x: (${xDirect} or ${xyDirect2.x} or ${tan[0]}, y: ${yDirect} or ${xyDirect2.y} or ${tan[1]}); angles: $angle or $angle3 or $angle4 or $angle2")
-        //Log.d("direct&&angle::", "Direct: ($xDirect or ${xyDirect.x} or ${pos[0]} or $x, $yDirect or ${xyDirect.y} or ${pos[1]} or $y); Angle: Rad=${angle}, Deg=${Math.toDegrees(angle)}")
-
-        return Ray(point, xyDirect2, angle)
-        //return Ray(Float2(x, y), xyDirect2, angle)
+        return Ray(xyPoint, xyDirection, angle)
     }
-
-    private fun recalcDirectV1(fraction: Float, startValue: Ray, endValue: Ray): Float2
-        = evalQuadTangentAtV2(fraction, startValue.origin, bezierParams, endValue.origin)
-//
-//    {
-//        val xDirect = 2 * (1 - fraction) * (bezierParams.x - startValue.origin.x)
-//        + 2 * fraction * (endValue.origin.x - bezierParams.x)
-//
-//        val yDirect = 2 * (1 - fraction) * (bezierParams.y - startValue.origin.y)
-//        + 2 * fraction * (endValue.origin.y - bezierParams.y)
-//
-//        return Float2(xDirect, yDirect) //+ Float2(xDirect, yDirect)
-//    }
-
-    private fun recalcDirectV2(fraction: Float, startValue: Ray, endValue: Ray): Float2
-        = evalQuadTangentAt(fraction, startValue.origin, bezierParams, endValue.origin)
 
 }
