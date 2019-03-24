@@ -1,6 +1,5 @@
 package com.msgkatz.demoview.math
 
-
 /**
  * Calc curve point at given fraction for quad bezier curve, which is set with given points start/mid/end
  * The quad bezier curve equation is Quad(t) = a(1 - t)^2 + 2b(1 - t)t + ct^2
@@ -40,4 +39,27 @@ fun evalQuadTangentAt(fraction: Float, startValue: Float2, midValue: Float2, end
     val T = A * fraction + B
 
     return T + T
+}
+
+/**
+ * Calc tangent vector at a given fraction for quad bezier curve, which is set with given points start/mid/end
+ * The derivative equation is 2(b - a +(a - 2b +c)t)
+ *
+ * 2nd version - seems not working
+ *
+ * @param fraction - t, time fraction
+ * @param startValue - start point a of a curve
+ * @param midValue - helper point b of a curve
+ * @param endValue - end point c of a curve
+ *
+ * */
+fun evalQuadTangentAtV2(fraction: Float, startValue: Float2, midValue: Float2, endValue: Float2): Float2 {
+
+    val xDirect = 2 * (1 - fraction) * (midValue.x - startValue.x)
+    + 2 * fraction * (endValue.x - midValue.x)
+
+    val yDirect = 2 * (1 - fraction) * (midValue.y - startValue.y)
+    + 2 * fraction * (endValue.y - midValue.y)
+
+    return Float2(xDirect, yDirect)
 }
