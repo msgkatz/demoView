@@ -30,13 +30,6 @@ class MotionView(context: Context, attrs: AttributeSet) : View(context, attrs), 
         viewTreeObserver.addOnPreDrawListener(this)
     }
 
-    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        val width = View.MeasureSpec.getSize(widthMeasureSpec)
-        val height = View.MeasureSpec.getSize(heightMeasureSpec)
-        val size = if (width > height) height else width
-        setMeasuredDimension(size, size)
-    }
-
     override fun onTouchEvent(event: MotionEvent): Boolean {
         return when (event.action) {
             MotionEvent.ACTION_DOWN -> {
